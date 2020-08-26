@@ -1,12 +1,15 @@
 package com.example.videoplay;
 
 import android.app.Activity;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.VideoView;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,6 +21,7 @@ public class VideoViewActivity extends Activity implements OnClickListener {
     private String path = "";
     private Timer timer;
     private TimerTask timerTask;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +33,7 @@ public class VideoViewActivity extends Activity implements OnClickListener {
         stopButton = (Button) this.findViewById(R.id.stopButton);
         mySeekBar = (SeekBar) this.findViewById(R.id.mySeekBar);
         myVideoView = (VideoView) this.findViewById(R.id.myVideoView);
+        progressBar = (ProgressBar) this.findViewById(R.id.progressBar);
 
         playPauseButton.setOnClickListener(this);
         replayButton.setOnClickListener(this);
@@ -38,17 +43,24 @@ public class VideoViewActivity extends Activity implements OnClickListener {
         path = MainActivity.url;
         //设置视频的路径
         myVideoView.setVideoPath(path);
-		//定时任务更新进度条
+        //定时任务更新进度条
         updateSeekBar();
         //为SeekBar设置事件监听
         setOnSeekBarChangeListener();
+        //设置加载准备完成监听
+        myVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                progressBar.setVisibility(View.GONE);
+            }
+        });
 
     }
 
-	/**
-	 * 定时任务更新进度条
-	 */
-	private void updateSeekBar() {
+    /**
+     * 定时任务更新进度条
+     */
+    private void updateSeekBar() {
         //定时器
         timer = new Timer();
         timerTask = new TimerTask() {//任务
@@ -76,10 +88,10 @@ public class VideoViewActivity extends Activity implements OnClickListener {
         timer.schedule(timerTask, 0, 500);//每秒钟进度条更新一次
     }
 
-	/**
-	 * 为SeekBar设置事件监听
-	 */
-	private void setOnSeekBarChangeListener() {
+    /**
+     * 为SeekBar设置事件监听
+     */
+    private void setOnSeekBarChangeListener() {
         mySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
